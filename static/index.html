@@ -47,6 +47,10 @@ body {
        start at the same height whatever the length of the text */
     .halves { grid-template-rows: auto auto auto 1fr; }
     .half { display: grid; grid-row: span 4; grid-template-rows: subgrid; align-items: start; }
+    /* the reflection hangs below its stage (negative margin, fading out) and
+       the tilted pictures reach a little past their boxes; without clipping,
+       both add to the page's scroll height and the page scrolls past the footer */
+    .half { overflow: hidden; overflow: clip; }
 }
 .stage { display: block; perspective: 1400px; }
 .picture { display: block; width: 100%; height: auto; border-radius: 10px; }
