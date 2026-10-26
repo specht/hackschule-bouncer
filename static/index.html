@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hackschule</title>
+<meta name="description" content="Informatik im Browser: das 2D Game Studio und der Hackschule Workspace.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+/* Two halves, each in the look of the site it leads to: the 2D Game Studio
+   (dark, blue to black, panels, Bebas Neue for the title, the studio's green)
+   and the Workspace (light header with Patua One, a green button, the
+   tilted picture on a glossy floor from its front page). Fonts come with
+   the page; nothing is loaded from anywhere else. */
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 400; font-display: swap; src: url(fonts/IBMPlexSans-Regular.ttf) format('truetype'); }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 600; font-display: swap; src: url(fonts/IBMPlexSans-SemiBold.ttf) format('truetype'); }
+@font-face { font-family: 'Bebas Neue'; font-weight: 400; font-display: swap; src: url(fonts/BebasNeue-Regular.ttf) format('truetype'); }
+@font-face { font-family: 'Patua One'; font-weight: 400; font-display: swap; src: url(fonts/PatuaOne-Regular.ttf) format('truetype'); }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+}
+.visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+}
+.halves { flex: 1; display: grid; grid-template-columns: 1fr; }
+@media (min-width: 992px) { .halves { grid-template-columns: 1fr 1fr; } }
+.half { display: flex; flex-direction: column; min-width: 0; }
+.half > p, .half > .button, .half > .stage {
+    margin-left: clamp(1.25em, 4vw, 3.5em);
+    margin-right: clamp(1.25em, 4vw, 3.5em);
+}
+.half > p { margin-top: 2em; margin-bottom: 1.2em; max-width: 34em; }
+.half > .stage { margin-top: 2em; margin-bottom: 3em; }
+@media (min-width: 992px) {
+    /* the two halves share their rows: titles, texts, buttons and pictures
+       start at the same height whatever the length of the text */
+    .halves { grid-template-rows: auto auto auto 1fr; }
+    .half { display: grid; grid-row: span 4; grid-template-rows: subgrid; align-items: start; }
+}
+.stage { display: block; perspective: 1400px; }
+.picture { display: block; width: 100%; height: auto; border-radius: 10px; }
+.reflection { display: none; }
+@media (min-width: 992px) {
+    .picture, .reflection { transition: transform 0.6s ease; }
+    .picture { position: relative; z-index: 1; }
+    .reflection {
+        display: block;
+        width: 100%;
+        height: auto;
+        margin-top: 1px;
+        margin-bottom: -44%;
+        border-radius: 10px;
+        opacity: 0.7;
+        -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 12%, transparent 30%);
+        mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 12%, transparent 30%);
+        pointer-events: none;
+    }
+    /* both pictures turned a little towards the middle of the page */
+    .studio .picture, .studio .reflection { transform-origin: 70% 50%; }
+    .studio .picture { transform: rotateY(11deg) rotateX(2deg); }
+    .studio .reflection { transform: rotateY(11deg) rotateX(-2deg) scaleY(-1); }
+    .workspace .picture, .workspace .reflection { transform-origin: 30% 50%; }
+    .workspace .picture { transform: rotateY(-11deg) rotateX(2deg); }
+    .workspace .reflection { transform: rotateY(-11deg) rotateX(-2deg) scaleY(-1); }
+    .half:hover .studio-stage .picture,
+    .stage:focus-visible .picture { transform: rotateY(0) rotateX(0); }
+    .half:hover .workspace-stage .picture { transform: rotateY(0) rotateX(0); }
+    .half:hover .reflection { transform: rotateY(0) rotateX(0) scaleY(-1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .picture, .reflection { transition: none; }
+}
+.button {
+    display: inline-flex;
+    align-self: flex-start;
+    justify-self: start;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.45em 1.1em;
+    font-weight: 600;
+    text-decoration: none;
+}
+.button svg { width: 1.1em; height: 1.1em; }
+
+/* 2D Game Studio */
+.studio {
+    color: #fff;
+    background: #000 url(2d-background.jpg) center top / cover no-repeat;
+}
+.studio-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 8rem;
+    background: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.studio-head h2 {
+    margin: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400;
+    font-size: 4rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+}
+.studio .picture { box-shadow: 0 0.4em 1.5em rgba(0, 0, 0, 0.5); outline: 1px solid rgba(255, 255, 255, 0.08); }
+.studio .button {
+    color: #102010;
+    background: #a7f070;
+    border-radius: 4px;
+}
+.studio .button:hover { background: #c3f79c; }
+.studio a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* Hackschule Workspace */
+.workspace { color: #212529; background: #fff; }
+.workspace-head { background: #f4f4f4; }
+.workspace-head h2 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 6.6rem;
+    padding: 0 0.3em;
+    font-family: 'Patua One', serif;
+    font-weight: 400;
+    font-size: 3rem;
+    line-height: 1.2;
+    text-align: center;
+}
+.workspace-menu {
+    height: 1.4rem;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+.workspace > p { color: #212529; }
+.workspace .picture { box-shadow: 0 0.2em 0.6em rgba(0, 0, 0, 0.18); }
+.workspace .button {
+    color: #fff;
+    background: #198754;
+    border-radius: 0.375rem;
+}
+.workspace .button:hover { background: #157347; }
+.workspace a:focus-visible { outline: 3px solid rgba(25, 135, 84, 0.5); outline-offset: 2px; }
+
+footer {
+    padding: 0.3em 1em;
+    border-top: 1px solid #ccc;
+    text-align: right;
+    font-size: 75%;
+    color: #888;
+    background: #f4f4f4;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+footer a { color: #888; text-decoration: none; }
+footer a:hover { color: #212529; text-decoration: underline; }
+
+@media (prefers-color-scheme: dark) {
+    .workspace { color: #e7e6e1; background: #151514; }
+    .workspace-head { background: #151514; }
+    .workspace-menu {
+        border: none;
+        box-shadow: 0 1em 2em -1em #000 inset, 0 -1em 2em -1em #000 inset;
+    }
+    .workspace > p { color: #e7e6e1; }
+    footer { border-top: 1px solid #333; background: #0e0e0d; color: #e7e6e1; }
+    footer a { color: #b5b4ae; }
+    footer a:hover { color: #e7e6e1; }
+}
+@media (max-width: 991.98px) {
+    .studio-head { height: 6rem; }
+    .studio-head h2 { font-size: 3.2rem; }
+    .workspace-head h2 { height: auto; padding: 0.45em 0.3em; font-size: 2.2rem; line-height: 1.15; }
+    .stage { max-width: 34rem; }
+}
+</style>
+</head>
+<body>
+<h1 class="visually-hidden">Hackschule</h1>
+<main class="halves">
+<section class="half studio" aria-labelledby="studio-title">
+<header class="studio-head"><h2 id="studio-title">2D Game Studio</h2></header>
+<p>Spiele bauen, ohne zu programmieren: Figuren Pixel für Pixel zeichnen und animieren, ihnen Eigenschaften geben und daraus Level bauen. Ohne Anmeldung, auch auf dem Tablet.</p>
+<a class="button" href="https://2d.hackschule.de/">Zum 2D Game Studio</a>
+<a class="stage studio-stage" href="https://2d.hackschule.de/" tabindex="-1" aria-hidden="true">
+<img class="picture" src="2d-game-studio.webp" width="1920" height="1080" alt="">
+<img class="reflection" src="2d-game-studio.webp" width="1920" height="1080" alt="">
+</a>
+</section>
+<section class="half workspace" aria-labelledby="workspace-title">
+<header class="workspace-header"><div class="workspace-head"><h2 id="workspace-title">Hackschule Workspace</h2></div><div class="workspace-menu"></div></header>
+<p>Eine Entwicklungsumgebung im Browser: Visual Studio Code mit Terminal, Git, vielen Programmiersprachen und eigenen Datenbanken, dazu Aktivitäten mit Aufgaben, die der Workspace selbst prüft. Für Schulen, mit Anmeldung.</p>
+<a class="button" href="https://workspace.hackschule.de/">Zum Workspace</a>
+<a class="stage workspace-stage" href="https://workspace.hackschule.de/" tabindex="-1" aria-hidden="true">
+<img class="picture" src="workspace.webp" width="1852" height="1040" alt="">
+<img class="reflection" src="workspace.webp" width="1852" height="1040" alt="">
+</a>
+</section>
+</main>
+<footer><a href="https://workspace.hackschule.de/impressum">Impressum und Datenschutzerklärung</a></footer>
+</body>
+</html>

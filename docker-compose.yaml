@@ -1,0 +1,18 @@
+# NOTICE: don't edit this file directly, use config.rb instead!
+---
+version: '3'
+services:
+  nginx:
+    build: "./docker/nginx"
+    volumes:
+    - "./static:/usr/share/nginx/html:ro"
+    - "/home/qts/data/hackschule/raw:/raw:ro"
+    - "/home/qts/logs/hackschule:/var/log/nginx"
+    environment:
+    - VIRTUAL_HOST=hackschule.de
+    - LETSENCRYPT_HOST=hackschule.de
+    - LETSENCRYPT_EMAIL=specht@gymnasiumsteglitz.de
+    expose:
+    - '80'
+    network_mode: default
+    restart: always
